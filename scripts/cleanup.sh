@@ -1,3 +1,3 @@
 #!/bin/bash
-docker stop myapp || true
-docker rm myapp || true
+docker stop mypythonapp || true
+docker rm mypythonapp || true
