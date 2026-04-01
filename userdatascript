@@ -1,0 +1,22 @@
+#!/bin/bash
+# Update packages
+apt-get update -y
+
+# Install Docker
+apt-get install -y docker.io
+systemctl start docker
+systemctl enable docker
+usermod -aG docker ubuntu
+
+# Install AWS CLI (if not already present)
+apt-get install -y awscli
+
+# Install CodeDeploy agent
+apt-get install -y ruby wget
+cd /home/ubuntu
+wget https://aws-codedeploy-us-east-1.s3.us-east-1.amazonaws.com/latest/install
+chmod +x ./install
+./install auto
+systemctl start codedeploy-agent
+systemctl enable codedeploy-agent
+
