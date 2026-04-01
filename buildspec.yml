@@ -12,3 +12,7 @@ phases:
       - docker tag $ImageName:latest 533267311092.dkr.ecr.us-east-1.amazonaws.com/$ImageName:latest
       - docker push 533267311092.dkr.ecr.us-east-1.amazonaws.com/$ImageName:latest
 
+artifacts:
+  files:
+    - appspec.yml
+    - scripts/*
