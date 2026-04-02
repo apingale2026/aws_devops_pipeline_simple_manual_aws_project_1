@@ -28,15 +28,16 @@ def add_task():
     tasks = load_tasks()
     tasks.append(task)
     save_tasks(tasks)
-    return jsonify({"message": "Task added", "tasks": tasks})
+    # Return the updated list so frontend can refresh immediately
+    return jsonify([{"id": i, "task": t} for i, t in enumerate(tasks)])
 
 @app.route("/tasks/<int:task_id>", methods=["DELETE"])
 def delete_task(task_id):
     tasks = load_tasks()
     if 0 <= task_id < len(tasks):
-        removed = tasks.pop(task_id)
+        tasks.pop(task_id)
         save_tasks(tasks)
-        return jsonify({"message": f"Deleted '{removed}'", "tasks": tasks})
+        return jsonify([{"id": i, "task": t} for i, t in enumerate(tasks)])
     return jsonify({"error": "Invalid task id"}), 404
 
 @app.route("/tasks/<int:task_id>", methods=["PUT"])
@@ -46,7 +47,7 @@ def update_task(task_id):
     if 0 <= task_id < len(tasks):
         tasks[task_id] = new_task
         save_tasks(tasks)
-        return jsonify({"message": "Task updated", "tasks": tasks})
+        return jsonify([{"id": i, "task": t} for i, t in enumerate(tasks)])
     return jsonify({"error": "Invalid task id"}), 404
 
 @app.route("/tasks/<int:task_id>/done", methods=["PATCH"])
@@ -55,7 +56,7 @@ def mark_done(task_id):
     if 0 <= task_id < len(tasks):
         tasks[task_id] = tasks[task_id] + " ✅"
         save_tasks(tasks)
-        return jsonify({"message": "Task marked done", "tasks": tasks})
+        return jsonify([{"id": i, "task": t} for i, t in enumerate(tasks)])
     return jsonify({"error": "Invalid task id"}), 404
 
 @app.route("/health", methods=["GET"])
@@ -92,18 +93,18 @@ def index():
           const tasks = await res.json();
           const list = document.getElementById("taskList");
           list.innerHTML = "";
-          tasks.forEach((task, i) => {
+          tasks.forEach((item) => {
             const li = document.createElement("li");
             li.textContent = item.id + ". " + item.task;
             const delBtn = document.createElement("button");
             delBtn.textContent = "Delete";
-            delBtn.onclick = () => deleteTask(i);
+            delBtn.onclick = () => deleteTask(item.id);
             const updBtn = document.createElement("button");
             updBtn.textContent = "Update";
-            updBtn.onclick = () => updateTask(i);
+            updBtn.onclick = () => updateTask(item.id);
             const doneBtn = document.createElement("button");
             doneBtn.textContent = "Done";
-            doneBtn.onclick = () => markDone(i);
+            doneBtn.onclick = () => markDone(item.id);
             li.appendChild(delBtn);
             li.appendChild(updBtn);
             li.appendChild(doneBtn);
@@ -113,13 +114,14 @@ def index():
 
         async function addTask() {
           const task = document.getElementById("newTask").value;
+          if (!task) return;
           await fetch("/tasks", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ task })
           });
           document.getElementById("newTask").value = "";
-          loadTasks();
+          loadTasks(); // refresh list after adding
         }
 
         async function deleteTask(id) {
