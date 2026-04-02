@@ -7,4 +7,4 @@ aws ecr get-login-password --region us-east-1 \
 docker pull 533267311092.dkr.ecr.us-east-1.amazonaws.com/$ImageName:latest
 
 # Run container
-docker run -d --name myapp -p 80:80 533267311092.dkr.ecr.us-east-1.amazonaws.com/$ImageName:latest
+docker run -d --name mypythonapp -p 80:80 533267311092.dkr.ecr.us-east-1.amazonaws.com/$ImageName:latest
