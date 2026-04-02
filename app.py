@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, Response
 import os
 
 app = Flask(__name__)
@@ -15,6 +15,8 @@ def save_tasks(tasks):
         for task in tasks:
             f.write(task + "\n")
 
+# ---------------- API ROUTES ----------------
+
 @app.route("/tasks", methods=["GET"])
 def get_tasks():
     return jsonify(load_tasks())
@@ -27,18 +29,126 @@ def add_task():
     save_tasks(tasks)
     return jsonify({"message": "Task added", "tasks": tasks})
 
-@app.route("/tasks/<int:idx>", methods=["DELETE"])
-def delete_task(idx):
+@app.route("/tasks/<int:task_id>", methods=["DELETE"])
+def delete_task(task_id):
     tasks = load_tasks()
-    if 0 <= idx < len(tasks):
-        tasks.pop(idx)
+    if 0 <= task_id < len(tasks):
+        removed = tasks.pop(task_id)
         save_tasks(tasks)
-        return jsonify({"message": "Task deleted", "tasks": tasks})
-    return jsonify({"error": "Invalid index"}), 400
+        return jsonify({"message": f"Deleted '{removed}'", "tasks": tasks})
+    return jsonify({"error": "Invalid task id"}), 404
+
+@app.route("/tasks/<int:task_id>", methods=["PUT"])
+def update_task(task_id):
+    new_task = request.json.get("task")
+    tasks = load_tasks()
+    if 0 <= task_id < len(tasks):
+        tasks[task_id] = new_task
+        save_tasks(tasks)
+        return jsonify({"message": "Task updated", "tasks": tasks})
+    return jsonify({"error": "Invalid task id"}), 404
+
+@app.route("/tasks/<int:task_id>/done", methods=["PATCH"])
+def mark_done(task_id):
+    tasks = load_tasks()
+    if 0 <= task_id < len(tasks):
+        tasks[task_id] = tasks[task_id] + " ✅"
+        save_tasks(tasks)
+        return jsonify({"message": "Task marked done", "tasks": tasks})
+    return jsonify({"error": "Invalid task id"}), 404
 
 @app.route("/health", methods=["GET"])
 def health():
     return jsonify({"status": "ok"})
+
+# ---------------- FRONTEND ----------------
+
+@app.route("/")
+def index():
+    html = """
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>My To‑Do App</title>
+      <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        ul { list-style-type: none; padding: 0; }
+        li { margin: 5px 0; }
+        button { margin-left: 10px; }
+      </style>
+    </head>
+    <body>
+      <h1>My Tasks</h1>
+      <ul id="taskList"></ul>
+
+      <h2>Add Task</h2>
+      <input type="text" id="newTask" placeholder="Enter task">
+      <button onclick="addTask()">Add</button>
+
+      <script>
+        async function loadTasks() {
+          const res = await fetch("/tasks");
+          const tasks = await res.json();
+          const list = document.getElementById("taskList");
+          list.innerHTML = "";
+          tasks.forEach((task, i) => {
+            const li = document.createElement("li");
+            li.textContent = task;
+            const delBtn = document.createElement("button");
+            delBtn.textContent = "Delete";
+            delBtn.onclick = () => deleteTask(i);
+            const updBtn = document.createElement("button");
+            updBtn.textContent = "Update";
+            updBtn.onclick = () => updateTask(i);
+            const doneBtn = document.createElement("button");
+            doneBtn.textContent = "Done";
+            doneBtn.onclick = () => markDone(i);
+            li.appendChild(delBtn);
+            li.appendChild(updBtn);
+            li.appendChild(doneBtn);
+            list.appendChild(li);
+          });
+        }
+
+        async function addTask() {
+          const task = document.getElementById("newTask").value;
+          await fetch("/tasks", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ task })
+          });
+          document.getElementById("newTask").value = "";
+          loadTasks();
+        }
+
+        async function deleteTask(id) {
+          await fetch("/tasks/" + id, { method: "DELETE" });
+          loadTasks();
+        }
+
+        async function updateTask(id) {
+          const newTask = prompt("Enter new task text:");
+          if (newTask) {
+            await fetch("/tasks/" + id, {
+              method: "PUT",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ task: newTask })
+            });
+            loadTasks();
+          }
+        }
+
+        async function markDone(id) {
+          await fetch("/tasks/" + id + "/done", { method: "PATCH" });
+          loadTasks();
+        }
+
+        loadTasks();
+      </script>
+    </body>
+    </html>
+    """
+    return Response(html, mimetype="text/html")
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=80)
