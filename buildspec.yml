@@ -9,14 +9,13 @@ phases:
   build:
     commands:
       - echo "Building Docker image..."
-      - docker buildx create --use
-      - docker buildx build --platform linux/arm64 -t 533267311092.dkr.ecr.us-east-1.amazonaws.com/mypythonapp:latest 
+      - docker build -t $IMAGE_NAME -f ./Dockerfile .
       - docker images
   post_build:
     commands:
       - echo "Tagging and pushing image to ECR..."
       - docker tag $IMAGE_NAME:latest 533267311092.dkr.ecr.us-east-1.amazonaws.com/$IMAGE_NAME:latest
-      - docker buildx build --platform linux/arm64 -t 533267311092.dkr.ecr.us-east-1.amazonaws.com/mypythonapp:latest --push .
+      - docker push 533267311092.dkr.ecr.us-east-1.amazonaws.com/$IMAGE_NAME:latest
 
 artifacts:
   files:
