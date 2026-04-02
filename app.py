@@ -20,7 +20,7 @@ def save_tasks(tasks):
 @app.route("/tasks", methods=["GET"])
 def get_tasks():
     tasks = load_tasks()
-    return jsonify([{"id": i, "task": t} for i, t in enumerate(tasks)])
+    return jsonify([{"id": i+1, "task": t} for i, t in enumerate(tasks)])
 
 @app.route("/tasks", methods=["POST"])
 def add_task():
@@ -28,35 +28,37 @@ def add_task():
     tasks = load_tasks()
     tasks.append(task)
     save_tasks(tasks)
-    # Return the updated list so frontend can refresh immediately
-    return jsonify([{"id": i, "task": t} for i, t in enumerate(tasks)])
+    return jsonify([{"id": i+1, "task": t} for i, t in enumerate(tasks)])
 
 @app.route("/tasks/<int:task_id>", methods=["DELETE"])
 def delete_task(task_id):
     tasks = load_tasks()
-    if 0 <= task_id < len(tasks):
-        tasks.pop(task_id)
+    index = task_id - 1   # adjust for 1-based IDs
+    if 0 <= index < len(tasks):
+        tasks.pop(index)
         save_tasks(tasks)
-        return jsonify([{"id": i, "task": t} for i, t in enumerate(tasks)])
+        return jsonify([{"id": i+1, "task": t} for i, t in enumerate(tasks)])
     return jsonify({"error": "Invalid task id"}), 404
 
 @app.route("/tasks/<int:task_id>", methods=["PUT"])
 def update_task(task_id):
     new_task = request.json.get("task")
     tasks = load_tasks()
-    if 0 <= task_id < len(tasks):
-        tasks[task_id] = new_task
+    index = task_id - 1
+    if 0 <= index < len(tasks):
+        tasks[index] = new_task
         save_tasks(tasks)
-        return jsonify([{"id": i, "task": t} for i, t in enumerate(tasks)])
+        return jsonify([{"id": i+1, "task": t} for i, t in enumerate(tasks)])
     return jsonify({"error": "Invalid task id"}), 404
 
 @app.route("/tasks/<int:task_id>/done", methods=["PATCH"])
 def mark_done(task_id):
     tasks = load_tasks()
-    if 0 <= task_id < len(tasks):
-        tasks[task_id] = tasks[task_id] + " ✅"
+    index = task_id - 1
+    if 0 <= index < len(tasks):
+        tasks[index] = tasks[index] + " ✅"
         save_tasks(tasks)
-        return jsonify([{"id": i, "task": t} for i, t in enumerate(tasks)])
+        return jsonify([{"id": i+1, "task": t} for i, t in enumerate(tasks)])
     return jsonify({"error": "Invalid task id"}), 404
 
 @app.route("/health", methods=["GET"])
@@ -121,7 +123,7 @@ def index():
             body: JSON.stringify({ task })
           });
           document.getElementById("newTask").value = "";
-          loadTasks(); // refresh list after adding
+          loadTasks();
         }
 
         async function deleteTask(id) {
