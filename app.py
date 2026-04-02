@@ -20,8 +20,7 @@ def save_tasks(tasks):
 @app.route("/tasks", methods=["GET"])
 def get_tasks():
     tasks = load_tasks()
-    numbered = [{"id": i, "task": t} for i, t in enumerate(tasks)]
-    return jsonify(numbered)
+    return jsonify([{"id": i, "task": t} for i, t in enumerate(tasks)])
 
 @app.route("/tasks", methods=["POST"])
 def add_task():
