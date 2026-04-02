@@ -27,4 +27,5 @@ A simple devops pipeline where we will build an app and push it to ECR and then 
   # docker tag todo_list_app:latest 533267311092.dkr.ecr.us-east-1.amazonaws.com/devops/python_app:to_do-v1
   # docker push 533267311092.dkr.ecr.us-east-1.amazonaws.com/devops/python_app:to_do-v1
 ```
+<img width="957" height="451" alt="image" src="https://github.com/user-attachments/assets/72fe9df2-49d9-49a8-b9d7-6b453e5c1516" />
 
