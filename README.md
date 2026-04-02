@@ -1,7 +1,10 @@
-# AWS Simple Devops pipeline manually Project-1 
-
-A simple devops pipeline where we will build an app and push it to ECR and then on EC2 we will pull and deploy this app
-
+# 📖 Project Overview
+A simple yet practical DevOps project where we:
+- Build a containerized web application (Flask-based To-Do app with CRUD functionality).
+- Push the Docker image to **Amazon ECR** for secure storage.
+- Deploy the application on **Amazon EC2**, pulling the image directly from ECR.
+- Automate the process using **AWS CodePipeline, CodeBuild, and CodeDeploy** for CI/CD.
+- 
 ##  Step1 Create a Repo locally, make directory a git directory and set username and email id and 
 
 
