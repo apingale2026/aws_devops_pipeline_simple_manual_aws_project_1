@@ -4,7 +4,25 @@ A simple yet practical DevOps project where we:
 - Push the Docker image to **Amazon ECR** for secure storage.
 - Deploy the application on **Amazon EC2**, pulling the image directly from ECR.
 - Automate the process using **AWS CodePipeline, CodeBuild, and CodeDeploy** for CI/CD.
-- 
+
+## 📐 Architecture
+
+1. **Developer/Source Code**
+   - Application code (Flask To-Do app) stored in GitHub.
+
+2. **Build & Containerization**
+   - Docker builds the image.
+   - Image is pushed to **Amazon ECR** (Elastic Container Registry).
+
+3. **Deployment**
+   - **Amazon EC2** instance pulls the image from ECR.
+   - Container runs the application on EC2.
+
+4. **CI/CD Automation**
+   - **AWS CodePipeline** orchestrates Source → Build → Deploy.
+   - **CodeBuild** compiles and pushes image.
+   - **CodeDeploy** handles deployment to EC2.
+
 ##  Step1 Create a Repo locally, make directory a git directory and set username and email id and 
 
 
